@@ -3,11 +3,16 @@ package cubex.mahesh.yoursaloon;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Typeface;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.net.Uri;
 import android.provider.MediaStore;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -15,6 +20,12 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.storage.FirebaseStorage;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -28,17 +39,21 @@ public class SalonRegistration extends AppCompatActivity {
     TextView sr;
     CircleImageView cview;
 
-    EditText email, pass, phno, city, location ;
+    EditText email, pass, phno, city, location;
 
     Button next;
+
+    private FirebaseAuth mAuth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_salon_registration);
 
+        mAuth = FirebaseAuth.getInstance();
+
         Typeface tf = Typeface.createFromAsset
-                (getAssets(),"B93.ttf");
+                (getAssets(), "B93.ttf");
 
         sr = findViewById(R.id.sr);
         sr.setTypeface(tf);
@@ -56,25 +71,24 @@ public class SalonRegistration extends AppCompatActivity {
                 DialogInterface.OnClickListener listener = new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        if(which==AlertDialog.BUTTON_POSITIVE)
-                        {
+                        if (which == AlertDialog.BUTTON_POSITIVE) {
                             Intent i = new Intent("android.media.action.IMAGE_CAPTURE");
-                            startActivityForResult(i,123);
-                        }else if(which==AlertDialog.BUTTON_NEGATIVE){
+                            startActivityForResult(i, 123);
+                        } else if (which == AlertDialog.BUTTON_NEGATIVE) {
 
-                            Intent i = new Intent( );
+                            Intent i = new Intent();
                             i.setAction(Intent.ACTION_GET_CONTENT);
                             i.setType("image/*");
-                            startActivityForResult(i,124);
+                            startActivityForResult(i, 124);
 
-                        }else if(which==AlertDialog.BUTTON_NEUTRAL){
-                                dialog.cancel();
+                        } else if (which == AlertDialog.BUTTON_NEUTRAL) {
+                            dialog.cancel();
                         }
                     }
                 };
-                ad.setPositiveButton("Camera",listener);
-                ad.setNegativeButton("Gallery",listener);
-                ad.setNeutralButton("Cancel",listener);
+                ad.setPositiveButton("Camera", listener);
+                ad.setNegativeButton("Gallery", listener);
+                ad.setNeutralButton("Cancel", listener);
                 ad.show();
             }
         });
@@ -99,15 +113,80 @@ public class SalonRegistration extends AppCompatActivity {
         next = findViewById(R.id.next);
         next.setTypeface(tf);
 
+        LocationManager lManager = (LocationManager)
+                getSystemService(Context.LOCATION_SERVICE);
+
+        int clocation_status = ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION);
+
+        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                &&
+                ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+           return;
+        }else {
+            Location l = lManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+            lManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,
+                    1000, 1, new LocationListener() {
+                        @Override
+                        public void onLocationChanged(Location location) {
+
+                            double lati = location.getLatitude();
+                            double longi = location.getLongitude();
+
+                            SalonRegistration.this.location.setText(lati+","+longi);
+
+                            lManager.removeUpdates(this);
+                        }
+
+                        @Override
+                        public void onStatusChanged(String s, int i, Bundle bundle) {
+
+                        }
+
+                        @Override
+                        public void onProviderEnabled(String s) {
+
+                        }
+
+                        @Override
+                        public void onProviderDisabled(String s) {
+
+                        }
+                    });
+    }
 
     }
 
    public void next(View v)
     {
-//    startActivity(new Intent(this,
-//                    SalonRegistration1.class));
+        mAuth.createUserWithEmailAndPassword(
+                email.getText().toString(),
+                pass.getText().toString()).addOnCompleteListener((task)->{
+                    if(task.isSuccessful()){
+
+                        String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+
+                        FirebaseDatabase dBase = FirebaseDatabase.getInstance();
+                        DatabaseReference ref =  dBase.getReference("/users");
+                        DatabaseReference child_ref = ref.child("/"+uid);
+                        child_ref.child("reg_type").setValue("salon");
+                        child_ref.child("email").setValue(email.getText().toString());
+                        child_ref.child("password").setValue(pass.getText().toString());
+                        child_ref.child("phoneno").setValue(phno.getText().toString());
+                        child_ref.child("city").setValue(city.getText().toString());
+                        child_ref.child("location").setValue(location.getText().toString());
+
+                        startActivity(new Intent(this,
+                                SalonRegistration1.class));
 
 
+                    }else{
+
+                        Toast.makeText(SalonRegistration.this,
+                                "Failed to Register, May be Email id is already exist!",
+                                Toast.LENGTH_LONG).show();
+
+                    }
+        });
 
     }
 
@@ -128,6 +207,8 @@ public class SalonRegistration extends AppCompatActivity {
                         100,fos);
                 fos.flush();
                 fos.close();
+
+
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -148,6 +229,8 @@ public class SalonRegistration extends AppCompatActivity {
                         100,fos);
                 fos.flush();
                 fos.close();
+
+
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -155,4 +238,5 @@ public class SalonRegistration extends AppCompatActivity {
         }
 
     }
+
 }

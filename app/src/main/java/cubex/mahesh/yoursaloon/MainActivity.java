@@ -26,8 +26,17 @@ public class MainActivity extends AppCompatActivity {
         int  storg_per_status = ContextCompat.checkSelfPermission(
 this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
 
-    if( cam_per_status == PackageManager.PERMISSION_GRANTED
-            && storg_per_status == PackageManager.PERMISSION_GRANTED)
+        int  coarse_loc_status = ContextCompat.checkSelfPermission(
+                this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
+
+        int  fine_loc_status = ContextCompat.checkSelfPermission(
+                this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
+
+
+        if( cam_per_status == PackageManager.PERMISSION_GRANTED
+            && storg_per_status == PackageManager.PERMISSION_GRANTED
+                && coarse_loc_status == PackageManager.PERMISSION_GRANTED
+        && fine_loc_status == PackageManager.PERMISSION_GRANTED)
     {
             startHandler();
     }else{
@@ -56,7 +65,9 @@ this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
 
         ActivityCompat.requestPermissions(this,
                 new String[]{Manifest.permission.CAMERA,
-                     Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                     Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                Manifest.permission.ACCESS_COARSE_LOCATION,
+                Manifest.permission.ACCESS_FINE_LOCATION},
                     123);
     }
 
