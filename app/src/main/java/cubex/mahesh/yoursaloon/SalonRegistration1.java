@@ -182,7 +182,7 @@ public class SalonRegistration1 extends AppCompatActivity {
                     addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                @Override
                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
- 
+
                 String url =    ref.getDownloadUrl().toString();
                    FirebaseDatabase dBase = FirebaseDatabase.getInstance();
                    DatabaseReference ref =  dBase.getReference("/users");
