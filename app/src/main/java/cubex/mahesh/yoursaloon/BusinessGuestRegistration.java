@@ -21,6 +21,8 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.location.places.Place;
+import com.google.android.gms.location.places.ui.PlacePicker;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
@@ -178,6 +180,20 @@ public class BusinessGuestRegistration extends AppCompatActivity {
 
         location = findViewById(R.id.location);
         location.setTypeface(tf);
+
+
+     Button   location_picker = findViewById(R.id.location_picker);
+        location_picker.setOnClickListener((v)->{
+
+            try {
+                PlacePicker.IntentBuilder builder = new PlacePicker.IntentBuilder();
+                Intent i = builder.build(BusinessGuestRegistration.this);
+                startActivityForResult(i,150);
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+        });
+
 
         LocationManager lManager = (LocationManager)
                 getSystemService(Context.LOCATION_SERVICE);
@@ -420,6 +436,16 @@ public class BusinessGuestRegistration extends AppCompatActivity {
 
         }
 
+        if(requestCode==150 && resultCode==RESULT_OK)
+        {
+            Place selectedPlace = PlacePicker.getPlace(data, this);
+
+            double lati = selectedPlace.getLatLng().latitude;
+            double longi = selectedPlace.getLatLng().latitude;
+
+            location.setText(lati+","+longi);
+
+        }
 
 
     }

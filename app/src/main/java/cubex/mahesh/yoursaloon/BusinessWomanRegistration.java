@@ -21,6 +21,8 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.location.places.Place;
+import com.google.android.gms.location.places.ui.PlacePicker;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
@@ -107,6 +109,19 @@ public class BusinessWomanRegistration extends AppCompatActivity {
 
         location = findViewById(R.id.location);
         location.setTypeface(tf);
+
+        Button location_picker = findViewById(R.id.location_picker);
+        location_picker.setOnClickListener((v)->{
+
+            try {
+                PlacePicker.IntentBuilder builder = new PlacePicker.IntentBuilder();
+                Intent i = builder.build(BusinessWomanRegistration.this);
+                startActivityForResult(i,150);
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+        });
+
 
         next = findViewById(R.id.next);
         next.setTypeface(tf);
@@ -241,6 +256,17 @@ public class BusinessWomanRegistration extends AppCompatActivity {
             } catch (IOException e) {
                 e.printStackTrace();
             }
+
+        }
+
+        if(requestCode==150 && resultCode==RESULT_OK)
+        {
+            Place selectedPlace = PlacePicker.getPlace(data, this);
+
+            double lati = selectedPlace.getLatLng().latitude;
+            double longi = selectedPlace.getLatLng().latitude;
+
+            location.setText(lati+","+longi);
 
         }
 

@@ -111,7 +111,7 @@ public class CustomerRegistration extends AppCompatActivity {
 
     }
 
-   public void next(View v)
+   public void submit(View v)
     {
 
 //    startActivity(new Intent(this,
@@ -138,6 +138,8 @@ public class CustomerRegistration extends AppCompatActivity {
 //                startActivity(new Intent(this,
 //                        SalonRegistration1.class));
 
+                startActivity(new Intent(this,
+                        DashboardActivity.class));
 
             }else{
 

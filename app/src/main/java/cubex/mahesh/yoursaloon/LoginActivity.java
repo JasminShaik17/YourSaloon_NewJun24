@@ -11,6 +11,9 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import com.google.firebase.auth.FirebaseAuth;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -18,6 +21,7 @@ public class LoginActivity extends AppCompatActivity {
     EditText email,pwd;
     CheckBox cb1;
     Button login, caft;
+    private FirebaseAuth mAuth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,9 +53,16 @@ public class LoginActivity extends AppCompatActivity {
         caft = findViewById(R.id.caft);
         caft.setTypeface(tf);
 
+        mAuth = FirebaseAuth.getInstance();
+
+
+
         cb1.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+
+
+
 
 
             }
@@ -59,8 +70,24 @@ public class LoginActivity extends AppCompatActivity {
 
         login.setOnClickListener((v)->{
 
+            mAuth.signInWithEmailAndPassword(email.getText().toString(),
+                    pwd.getText().toString()).addOnCompleteListener((task)->{
+
+                        if(task.isSuccessful()){
+
+                     startActivity(new Intent(LoginActivity.this,
+                             DashboardActivity.class));
 
 
+                        }else{
+
+                            Toast.makeText(LoginActivity.this,
+                                    "Please provide valid credentials",
+                                    Toast.LENGTH_LONG).show();
+
+                        }
+
+            });
         });
 
         caft.setOnClickListener((v)->{
